@@ -1,0 +1,18 @@
+{{ "now"|date('d/m/Y') }}
+<p>{{ "Il y a %s pommes et %s poires"|format(153, 9) }}</p>
+
+Longueur de la variable : {{ "Je contiens 25 caractères"|length }}
+
+<p>{{ app.request }}</p>
+
+{# app/config/parameters.yml} puis
+Symfony/app/config/config.yml à # Twig Configuration#}
+<p>Webmaster : {{ webmaster }}</p>
+
+<p>Test de présence de variable :</p>
+<p>{% if var is defined %}
+    <h2>Présente</h2>
+    {% else %}
+    <h2>Pas présente</h2>
+    {% endif %}
+</p>
