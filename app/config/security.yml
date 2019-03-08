@@ -1,24 +1,36 @@
-# To get started with security, check out the documentation:
-# https://symfony.com/doc/current/security.html
 security:
 
-    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
-    providers:
-        in_memory:
-            memory: ~
+  encoders:
+    OC\UserBundle\Entity\User: sha512
 
-    firewalls:
-        # disables authentication for assets and the profiler, adapt it according to your needs
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
+  role_hierarchy:
+    ROLE_ADMIN:       [ROLE_AUTEUR, ROLE_MODERATEUR]
+    ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
-        main:
-            anonymous: ~
-            # activate different ways to authenticate
+  providers:
+    main:
+      id: fos_user.user_provider.username
 
-            # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
-            #http_basic: ~
+  firewalls:
+    # On crée un pare-feu uniquement pour le formulaire
+    main_login:
+      # Cette expression régulière permet de prendre /login (mais pas /login_check !)
+      pattern:   ^/login$
+      anonymous: true # On autorise alors les anonymes sur ce pare-feu
+    main:
+      pattern:   ^/
+      anonymous: false
+      provider: main
+      form_login:
+        login_path: fos_user_security_login
+        check_path: fos_user_security_check
+      logout:
+        path:       fos_user_security_logout
+        target:     fos_user_security_login
+      remember_me:
+        secret: %secret% #secret est un paramètre de parameter déjà présent
 
-            # https://symfony.com/doc/current/security/form_login_setup.html
-            #form_login: ~
+  access_control:
+  # - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }
+  # toutes les url qui commencent par /admin requièrent le rôle admin
+    - { path: ^/admin, roles: ROLE_ADMIN }

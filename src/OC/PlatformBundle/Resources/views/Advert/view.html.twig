@@ -8,12 +8,58 @@
 
 {% block ocplatform_body %}
 
+  <div style="float:left; margin-right:1em;">
+    {% if advert.image %}
+      <img
+        src="{{ asset(advert.image.webPath) }}"
+        alt="{{ advert.image.alt }}"
+        height="60"
+      />
+    {% endif %}
+  </div>
+
   <h2>{{ advert.title }}</h2>
   <i>Par {{ advert.author }}, le {{ advert.date|date('d/m/Y') }}</i>
 
   <div class="well">
     {{ advert.content }}
   </div>
+
+  {% if listSkills %}
+    <div class="alert alert-success">
+      <p>
+        Compétence requises :
+        {% for advertSkill in listSkills %}
+          {{advertSkill.skill.name }} niveau : {{ advertSkill.level }} {% if not loop.last %}/ {% endif %}
+        {% endfor %}
+      </p>
+    </div>
+  {% endif %}
+
+  {% if listApplications %}
+    <h5>Candidature :</h5>
+    <div>
+      {% for application in listApplications %}
+        <h6>Par {{ application.author }}, le {{ application.date|date('d/m/Y') }}</h6>
+        <p>{{ application.content }}</p>
+        <hr>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+
+  {% if not advert.categories.empty %}
+    <div class="alert alert-info">
+      <p>
+        Cette annonce est parue dans les catégories suivantes :
+        {% for category in advert.categories %}
+          {# if not loop.last pour ne pas mettre de , après la dernière catégorie#}
+          {{ category.name }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+    </div>
+  {% endif %}
+
 
   <p>
     <a href="{{ path('oc_platform_home') }}" class="btn btn-default">
