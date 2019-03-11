@@ -23,36 +23,37 @@ class AdvertType extends AbstractType
     // Types de champs : https://openclassrooms.com/courses/developpez-votre-site-web-avec-le-framework-symfony/creer-des-formulaires-avec-symfony#/id/r-3623425
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-      $builder
-      ->add('date',      DateTimeType::class)
-      ->add('title',     TextType::class)
-      ->add('author',    TextType::class)
-      ->add('content',   TextareaType::class)
-      ->add('published', CheckboxType::class, array('required' => false))
-      ->add('image',     ImageType::class, array('required' => false))
-      ->add('categories',EntityType::class, array(
-        'class'        => 'OCPlatformBundle:Category',
-        'choice_label' => 'name',
-        'multiple'     => true,
-      ))
-      ->add('save',      SubmitType::class);
+        $builder
+            ->add('date',      DateTimeType::class)
+            ->add('title',     TextType::class)
+            ->add('author',    TextType::class)
+            ->add('content',   TextareaType::class)
+            ->add('published', CheckboxType::class, array('required' => false))
+            ->add('image',     ImageType::class, array('required' => false))
+            ->add('categories',EntityType::class, array(
+                'class'        => 'OCPlatformBundle:Category',
+                'choice_label' => 'name',
+                'multiple'     => true,
+                'expanded' => true,
+            ))
+            ->add('save',      SubmitType::class);
 
-      $builder->addEventListener(
-        FormEvents::PRE_SET_DATA,
-        function(FormEvent $event) {
-          $advert = $event->getData();
+        $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
+            function(FormEvent $event) {
+                $advert = $event->getData();
 
-          if (null === $advert) {
-            return;
-          }
+                if (null === $advert) {
+                    return;
+                }
 
-          if (!$advert->getPublished() || null === $advert->getId()) {
-            $event->getForm()->add('published', CheckboxType::class, array('required' => false));
-          } else {
-            $event->getForm()->remove('published');
-          }
-        }
-      );
+                if (!$advert->getPublished() || null === $advert->getId()) {
+                    $event->getForm()->add('published', CheckboxType::class, array('required' => false));
+                } else {
+                    $event->getForm()->remove('published');
+                }
+            }
+        );
     }
 
     /**
@@ -61,9 +62,9 @@ class AdvertType extends AbstractType
     // Définitier de l'objet utilisé pour la formulaire
     public function configureOptions(OptionsResolver $resolver)
     {
-      $resolver->setDefaults(array(
-        'data_class' => 'OC\PlatformBundle\Entity\Advert'
-      ));
+        $resolver->setDefaults(array(
+            'data_class' => 'OC\PlatformBundle\Entity\Advert'
+        ));
     }
 
     /**
@@ -71,8 +72,8 @@ class AdvertType extends AbstractType
      */
     public function getBlockPrefix()
     {
-      return 'oc_platformbundle_advert';
+        return 'oc_platformbundle_advert';
     }
 
 
-  }
+}

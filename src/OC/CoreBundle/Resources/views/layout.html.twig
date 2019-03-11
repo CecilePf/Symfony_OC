@@ -1,71 +1,81 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block title %}OC Plateforme{% endblock %}</title>
+        <title>{% block title %}OC Plateforme{% endblock %}</title>
 
-    {% block stylesheets %}
-      {# On charge le CSS de bootstrap depuis le site directement #}
-      <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    {% endblock %}
-  </head>
-
-  <body>
-  <div class="container">
-
-    <div id="header" class="jumbotron">
-      <h1>Ma plateforme d'annonces</h1>
-      <p>
-        Ce projet est propulsé par Symfony, et construit grâce au MOOC OpenClassrooms et SensioLabs.
-      </p>
-      <p>
-        <a class="btn btn-primary btn-lg" href="https://openclassrooms.com/courses/developpez-votre-site-web-avec-le-framework-symfony2">
-          Participer au MOOC »
-        </a>
-      </p>
-    </div>
-
-    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    Connecté en tant que "{{ app.user.username }}"
-      -
-      <a href="{{ path('fos_user_security_logout') }}">Déconnexion</a>
-    {% else %}
-      <a href="{{ path('fos_user_security_login') }}">Connexion</a>
-    {% endif %}
-
-    <div class="row">
-      <div id="menu" class="col-md-3">
-        <h3>Les annonces</h3>
-        <ul class="nav nav-pills nav-stacked">
-          <li><a href="{{ path('oc_platform_home') }}">Accueil</a></li>
-          {#{% if is_granted('ROLE_AUTEUR') %}#}
-            <li><a href="{{ path('oc_platform_add') }}">Ajouter une annonce</a></li>
-          {#{% endif %}#}
-        </ul>
-
-        <h4>Dernières annonces</h4>
-        {{ render(controller("OCPlatformBundle:Advert:menu", {'limit': 3})) }}
-      </div>
-      <div id="content" class="col-md-9">
-        {% block body %}
+        {% block stylesheets %}
+          {# On charge le CSS de bootstrap depuis le site directement #}
+          <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         {% endblock %}
-      </div>
-    </div>
+    </head>
 
-    <hr>
+    <body>
+        <div class="container">
 
-    <footer>
-      <p>The sky's the limit © {{ 'now'|date('Y') }} and beyond.</p>
-    </footer>
-  </div>
+            <div id="header" class="jumbotron">
+                <h1>Ma plateforme d'annonces</h1>
+                <p>
+                    Ce projet est propulsé par Symfony, et construit grâce au MOOC OpenClassrooms et SensioLabs.
+                </p>
+                <p>
+                    <a class="btn btn-primary btn-lg" href="https://openclassrooms.com/courses/developpez-votre-site-web-avec-le-framework-symfony2">
+                        Participer au MOOC »
+                    </a>
+                </p>
+            </div>
 
-  {% block javascripts %}
-    {# Ajoutez ces lignes JavaScript si vous comptez vous servir des fonctionnalités du bootstrap Twitter #}
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  {% endblock %}
+            {#{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}#}
+                {#Connecté en tant que "{{ app.user.username }}"#}
+                {#-#}
+                {#<a href="{{ path('fos_user_security_logout') }}">Déconnexion</a>#}
+            {#{% else %}#}
+                {#<a href="{{ path('fos_user_security_login') }}">Connexion</a>#}
+            {#{% endif %}#}
 
-  </body>
+            <div class="row">
+                <div id="menu" class="col-md-3">
+                    <h3>Les annonces</h3>
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a href="{{ path('oc_core_home') }}">Accueil</a></li>
+                        <li><a href="{{ path('oc_platform_home') }}">Liste des annonces</a></li>
+                        {#{% if is_granted('ROLE_AUTEUR') %}#}
+                            <li><a href="{{ path('oc_platform_add') }}">Ajouter une annonce</a></li>
+                        {#{% endif %}#}
+                    </ul>
+
+                    <h4>Dernières annonces</h4>
+                    {{ render(controller("OCPlatformBundle:Advert:menu", {'limit': 3})) }}
+                </div>
+                <div id="content" class="col-md-9">
+                    {% block body %}
+                    {% endblock %}
+                </div>
+            </div>
+
+            <hr>
+
+            <footer>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>The sky's the limit © {{ 'now'|date('Y') }} and beyond.</p>
+                        </div>
+                        <div class="col-md-6 text-right">
+                        <a href="{{ path('oc_core_contact') }}">
+                            Contact
+                        </a>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+
+        {% block javascripts %}
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+            <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        {% endblock %}
+
+    </body>
 </html>

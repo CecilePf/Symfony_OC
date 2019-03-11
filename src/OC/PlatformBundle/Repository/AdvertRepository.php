@@ -15,159 +15,148 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 class AdvertRepository extends \Doctrine\ORM\EntityRepository
 {
 
-  public function myFindAll()
-  {
-    // Méthode 1 : en passant par l'EntityManager
-    // $queryBuilder = $this->_em->createQueryBuilder()
-    //   ->select('a')
-    //   ->from($this->_entityName, 'a')
-    ;
-    // Dans un repository, $this->_entityName est le namespace de l'entité gérée
-    // Ici, il vaut donc OC\PlatformBundle\Entity\Advert
+    public function myFindAll()
+    {
+        return $this
+            ->createQueryBuilder('a')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 
-    // Méthode 2 : en passant par le raccourci (je recommande)
-    // $queryBuilder = $this->createQueryBuilder('a');
+    public function myFindOne($id)
+    {
+        $qb = $this->createQueryBuilder('a');
 
-    // On n'ajoute pas de critère ou tri particulier, la construction
-    // de notre requête est finie
+        $qb
+            ->where('a.id = :id')
+            ->setParameter('id', $id)
+        ;
 
-    // On récupère la Query à partir du QueryBuilder
-    // $query = $queryBuilder->getQuery();
+        return $qb
+            ->getQuery()
 
-    // On récupère les résultats à partir de la Query
-    // $results = $query->getResult();
+            // Exécute la requête et retourne un tableau contenant les résultats sous forme d'objets.
+            ->getResult()
+            ;
+    }
 
-    // On retourne ces résultats
-    // return $results;
+    public function findByAuthorAndDate($author, $year)
+    {
+        $qb = $this->createQueryBuilder('a');
 
-    // Et en raccourci :
-    return $this
-    ->createQueryBuilder('a')
-    ->getQuery()
-    ->getResult()
-  ;
-  }
+        $qb->where('a.author = :author')
+            ->setParameter('author', $author)
+            ->andWhere('a.date < :year')
+            ->setParameter('year', $year)
+            ->orderBy('a.date', 'DESC')
+        ;
 
-  public function myFindOne($id)
-  {
-    $qb = $this->createQueryBuilder('a');
+        return $qb
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 
-    $qb
-      ->where('a.id = :id')
-      ->setParameter('id', $id)
-    ;
+    public function whereCurrentYear(QueryBuilder $qb)
+    {
+        $qb
+            ->andWhere('a.date BETWEEN :start AND :end')
+            ->setParameter('start', new \Datetime(date('Y').'-01-01'))  // Date entre le 1er janvier de cette année
+            ->setParameter('end',   new \Datetime(date('Y').'-12-31'))  // Et le 31 décembre de cette année
+        ;
+    }
 
-    return $qb
-      ->getQuery()
+    public function myFind()
+    {
+        $qb = $this->createQueryBuilder('a');
 
-      // Exécute la requête et retourne un tableau contenant les résultats sous forme d'objets.
-      ->getResult()
-    ;
-  }
+        // On peut ajouter ce qu'on veut avant
+        $qb
+            ->where('a.author = :author')
+            ->setParameter('author', 'Marine')
+        ;
 
-  public function findByAuthorAndDate($author, $year)
-  {
-    $qb = $this->createQueryBuilder('a');
+        // On applique notre condition sur le QueryBuilder
+        $this->whereCurrentYear($qb);
 
-    $qb->where('a.author = :author')
-         ->setParameter('author', $author)
-       ->andWhere('a.date < :year')
-         ->setParameter('year', $year)
-       ->orderBy('a.date', 'DESC')
-    ;
+        // On peut ajouter ce qu'on veut après
+        $qb->orderBy('a.date', 'DESC');
 
-    return $qb
-      ->getQuery()
-      ->getResult()
-    ;
-  }
+        return $qb
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 
-  public function whereCurrentYear(QueryBuilder $qb)
-  {
-    $qb
-      ->andWhere('a.date BETWEEN :start AND :end')
-      ->setParameter('start', new \Datetime(date('Y').'-01-01'))  // Date entre le 1er janvier de cette année
-      ->setParameter('end',   new \Datetime(date('Y').'-12-31'))  // Et le 31 décembre de cette année
-    ;
-  }
+    public function getAdvertWithApplications()
+    {
+        $qb = $this
+            ->createQueryBuilder('a')
+            // 1er argument : l'attribut de l'entité principale (celle qui est dans le FROM)
+            // 2ème argument : alias de l'entité jointe
+            ->leftJoin('a.applications', 'app')
+            // On sélectionne l'entité jointe
+            // un select écraserait le select('a')
+            ->addSelect('app')
+        ;
 
-  public function myFind()
-  {
-    $qb = $this->createQueryBuilder('a');
+        return $qb
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 
-    // On peut ajouter ce qu'on veut avant
-    $qb
-      ->where('a.author = :author')
-      ->setParameter('author', 'Marine')
-    ;
+    public function getAdvertWithCategories(array $categoryNames)
+    {
+        $qb = $this-> createQueryBuilder('a');
 
-    // On applique notre condition sur le QueryBuilder
-    $this->whereCurrentYear($qb);
+        $qb
+            ->innerJoin('a.categories', 'c')
+            ->addSelect('c');
 
-    // On peut ajouter ce qu'on veut après
-    $qb->orderBy('a.date', 'DESC');
+        // Puis on filtre sur le nom des catégories à l'aide d'un IN
+        $qb->where($qb->expr()->in('c.name', $categoryNames));
+        // La syntaxe du IN et d'autres expressions se trouve dans la documentation Doctrine
 
-    return $qb
-      ->getQuery()
-      ->getResult()
-    ;
-  }
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 
-  public function getAdvertWithApplications()
-  {
-    $qb = $this
-      ->createQueryBuilder('a')
-      // 1er argument : l'attribut de l'entité principale (celle qui est dans le FROM)
-      // 2ème argument : alias de l'entité jointe
-      ->leftJoin('a.applications', 'app')
-      // On sélectionne l'entité jointe
-      // un select écraserait le select('a')
-      ->addSelect('app')
-    ;
+    public function getAdverts($page, $nbPerPage)
+    {
+        $query = $this->createQueryBuilder('a')
+            ->leftJoin('a.image', 'i')
+            ->addSelect('i')
+            ->leftJoin('a.categories', 'c')
+            ->addSelect('c')
+            ->orderBy('a.date', 'DESC')
+            ->getQuery()
+        ;
 
-    return $qb
-      ->getQuery()
-      ->getResult()
-    ;
-  }
+        $query
+            // On définit l'annonce à partir de laquelle commencer la liste
+            ->setFirstResult(($page-1) * $nbPerPage)
+            // Ainsi que le nombre d'annonce à afficher sur une page
+            ->setMaxResults($nbPerPage)
+        ;
 
-  public function getAdvertWithCategories(array $categoryNames)
-  {
-    $qb = $this-> createQueryBuilder('a');
+        // Enfin, on retourne l'objet Paginator correspondant à la requête construite
+        return new Paginator($query, true);
+    }
 
-    $qb
-      ->innerJoin('a.categories', 'c')
-      ->addSelect('c');
-
-    // Puis on filtre sur le nom des catégories à l'aide d'un IN
-    $qb->where($qb->expr()->in('c.name', $categoryNames));
-    // La syntaxe du IN et d'autres expressions se trouve dans la documentation Doctrine
-
-    return $qb
-      ->getQuery()
-      ->getResult();
-  }
-
-  public function getAdverts($page, $nbPerPage)
-  {
-    $query = $this->createQueryBuilder('a')
-      ->leftJoin('a.image', 'i')
-      ->addSelect('i')
-      ->leftJoin('a.categories', 'c')
-      ->addSelect('c')
-      ->orderBy('a.date', 'DESC')
-      ->getQuery()
-    ;
-
-    $query
-      // On définit l'annonce à partir de laquelle commencer la liste
-      ->setFirstResult(($page-1) * $nbPerPage)
-      // Ainsi que le nombre d'annonce à afficher sur une page
-      ->setMaxResults($nbPerPage)
-    ;
-
-    // Enfin, on retourne l'objet Paginator correspondant à la requête construite
-    return new Paginator($query, true);
-  }
+    // Récupère les annonces postées/modifiées avant une date donnée
+    public function getAdvertsBefore(\Datetime $date)
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.updatedAt <= :date')
+            ->orWhere('a.updatedAt IS NULL AND a.date <= :date')
+            ->andWhere('a.applications IS EMPTY')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 
 }
